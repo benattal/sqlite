@@ -38,12 +38,12 @@ class DatabaseObject(object):
         return cursor
 
     def select(self, tables, *args, **kwargs):
-        vals = ','.join(['?' for l in args])
+        vals = ','.join([l for l in args])
         locs = ','.join(tables)
         conds = ' and '.join(['%s=?' % k for k in kwargs])
         subs = [kwargs[k] for k in kwargs]
         query = queries['SELECT'] % (vals, locs, conds)
-        return self.read(query, list(args) + subs)
+        return self.read(query, subs)
 
     def insert(self, table_name, *args):
         values = ','.join(['?' for l in args])
