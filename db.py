@@ -3,6 +3,7 @@ import sqlite3
 
 queries = {
     'SELECT': 'SELECT %s FROM %s WHERE %s',
+    'SELECT_ALL': 'SELECT %s FROM %s',
     'INSERT': 'INSERT INTO %s VALUES(%s)',
     'UPDATE': 'UPDATE %s SET %s WHERE %s',
     'DELETE': 'DELETE FROM %s where %s',
@@ -45,6 +46,12 @@ class DatabaseObject(object):
         query = queries['SELECT'] % (vals, locs, conds)
         return self.read(query, subs)
 
+    def select_all(self, tables, *args):
+        vals = ','.join([l for l in args])
+        locs = ','.join(tables)
+        query = queries['SELECT_ALL'] % (vals, locs)
+        return self.read(query)
+    
     def insert(self, table_name, *args):
         values = ','.join(['?' for l in args])
         query = queries['INSERT'] % (table_name, values)
@@ -89,6 +96,9 @@ class Table(DatabaseObject):
 
     def select(self, *args, **kwargs):
         return super(Table, self).select([self.table_name], *args, **kwargs)
+
+    def select_all(self, *args):
+        return super(Table, self).select_all([self.table_name], *args)
 
     def insert(self, *args):
         return super(Table, self).insert(self.table_name, *args)
@@ -141,3 +151,12 @@ class User(Table):
         results = self.select('username', username=username,
                               password=password)
         return len(results) > 0
+
+if __name__ == '__main__':
+    user = User('test.dat')
+    user.delete_all()
+    user.insert('ben', 'attal')
+    user.insert('hello', 'world')
+    cursor =  user.select_all('*')
+    print cursor.fetchall()
+    cursor.close()
